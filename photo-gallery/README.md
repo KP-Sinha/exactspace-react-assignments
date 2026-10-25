@@ -6,12 +6,20 @@ A single-page, infinite-scrolling photo feed based on paginated JSON feeds from 
 
 ## 1. Project Overview
 
-This application renders a clean 1-column photo gallery matching the provided visual mockup (`photo-gallery.jpg` / `photo-gallery.png`). As the user scrolls to the bottom of the page, it automatically fetches subsequent paginated JSON feeds and appends new photos to the existing feed until all pages are exhausted.
+This application renders a clean 1-column photo gallery matching the provided visual mockups (`photo-gallery.jpg` / `photo-gallery.png`). As the user scrolls to the bottom of the page, it automatically fetches subsequent paginated JSON feeds from Lorem Picsum and seamlessly appends new photos to the existing feed until all pages are exhausted.
+
+In addition to all mandatory requirements, this version includes professional user experience enhancements:
+- **Skeleton Shimmer Loading:** Placeholders before images load to prevent layout shifts.
+- **Lightbox Image Preview Modal:** Full-screen modal with author name and keyboard navigation (`Escape`, backdrop click).
+- **Direct Download & Open Original:** Clean download action linking to the high-resolution source image (`download_url`).
+- **Persistent Likes (localStorage):** Thumbs-up like counts persist across page reloads per browser.
+- **Back-to-Top Floating Action Button:** Appears on scroll with smooth scrolling and `prefers-reduced-motion` support.
 
 ---
 
 ## 2. Features Implemented
 
+### A. Mandatory Requirements
 - **1-Column Responsive Feed:** Displays each photo on the left with author name and interactive thumbs-up like button on the right.
 - **Picsum API Integration:** Fetches live data from `https://picsum.photos/v2/list?page=${page}` starting at page 1.
 - **Infinite Scrolling:** Uses the browser `IntersectionObserver` API on a sentinel element with pre-fetch margins (`rootMargin: '250px'`) for fluid, non-blocking page loads.
@@ -19,7 +27,13 @@ This application renders a clean 1-column photo gallery matching the provided vi
 - **State Preservation:** Previously loaded photos and their individual like counts are retained when new pages are fetched.
 - **Duplicate & Race Condition Protection:** De-duplicates incoming photo records and blocks redundant fetch requests while a page is in flight.
 - **Loading & Error Handling:** Shows an accessible loading indicator during initial and paginated loads, and an error banner with a manual **Retry** button on network failure.
-- **Performance Optimization:** Images use `loading="lazy"` with fallback handling on error.
+
+### B. Professional Enhancements
+- **Image Skeleton Loading:** Shimmer animation placeholder rendered while the thumbnail is loading, eliminating layout shifts and gracefully handling load errors.
+- **Image Preview / Lightbox:** Clicking any photo opens a high-resolution preview modal with photographer attribution, download option, focus trapping, and `Escape` dismissal.
+- **Download Original Photo:** Direct download button linking to the uncompressed `download_url`. If cross-origin download restrictions apply in certain browsers, it gracefully opens the original high-resolution image in a new tab.
+- **LocalStorage Like Persistence:** Likes are stored by photo ID in `localStorage` under `exactspace_photo_gallery_likes_v1`. Counts persist after page reload, and corrupted storage data is handled gracefully with zero crashes.
+- **Back-to-Top Floating Button:** Automatically appears when scrolling past 400px, smoothly returning to the top of the gallery while respecting reduced-motion system preferences.
 
 ---
 
@@ -29,7 +43,7 @@ This application renders a clean 1-column photo gallery matching the provided vi
 - **Build Tool:** Vite 8 (`@vitejs/plugin-react`)
 - **Icons:** FontAwesome React (`@fortawesome/react-fontawesome`, `@fortawesome/free-solid-svg-icons`)
 - **Language:** JavaScript (JSX)
-- **Styling:** Plain CSS (CSS Variables, Flexbox, Media Queries)
+- **Styling:** Plain CSS (CSS Variables, Flexbox, Animations, Media Queries)
 - **Linter:** Oxlint
 
 ---
@@ -41,31 +55,25 @@ This application renders a clean 1-column photo gallery matching the provided vi
 
 ---
 
-## 5. Installation Instructions
+## 5. Installation & Local Development
 
-Navigate to the `photo-gallery` directory and install dependencies:
-
+### Install dependencies:
 ```bash
 cd photo-gallery
 npm install
 ```
 
----
-
-## 6. Local Development
-
-Start the Vite development server:
-
+### Run development server:
 ```bash
 npm run dev
 ```
 
-The application runs on port `5174` (to avoid conflicting with the Chat App on port `5173`):
+The application runs on port `5174` (preventing any conflict with the Chat App on port `5173`):
 `http://127.0.0.1:5174/`
 
 ---
 
-## 7. Production Build & Linting
+## 6. Production Build & Linting
 
 ### Build for production:
 ```bash
@@ -85,6 +93,13 @@ npm run preview
 
 ---
 
+## 7. Storage & Download Behavior Details
+
+- **LocalStorage Likes:** Like counts are stored in the client browser's `localStorage`. They persist indefinitely across browser sessions and reloads for that specific browser. Likes are not shared across multiple users/devices since no backend database was required.
+- **Image Download Behavior:** The download button links directly to Picsum's `download_url` with the `download` HTML attribute. Where modern browser CORS policies restrict direct forced filesystem saves of remote cross-origin assets, the link opens the original high-resolution image in a clean new tab where it can be saved directly.
+
+---
+
 ## 8. Project Structure
 
 ```text
@@ -93,13 +108,18 @@ photo-gallery/
 │   └── vite.svg
 ├── src/
 │   ├── components/
-│   │   ├── PhotoGallery.jsx                  # Main container & IntersectionObserver controller
-│   │   ├── PhotoItem.jsx                     # 1-column photo card & FontAwesome thumbs-up
+│   │   ├── PhotoGallery.jsx                  # Main feed, IntersectionObserver & localStorage
+│   │   ├── PhotoItem.jsx                     # 1-column card, skeleton & thumbs-up
+│   │   ├── Lightbox.jsx                      # Accessible image preview modal
+│   │   ├── BackToTop.jsx                     # Floating scroll-to-top button
 │   │   └── LoadingIndicator.jsx              # Loading spinner component
 │   ├── hooks/
 │   │   └── useInfinitePhotos.js              # Paginated fetch hook with duplicate guard
 │   ├── styles/
-│   │   └── PhotoGallery.css                  # Feed layout, hover states, and responsive design
+│   │   ├── PhotoGallery.css                  # Feed layout, hover states, and responsive design
+│   │   ├── Skeleton.css                      # Skeleton shimmer animation styles
+│   │   ├── Lightbox.css                      # Modal backdrop, content and controls
+│   │   └── BackToTop.css                     # Floating button styling and animations
 │   ├── App.jsx                               # Root application component
 │   ├── index.css                             # Global reset and typography variables
 │   └── main.jsx                              # React DOM mount entry
@@ -113,19 +133,3 @@ photo-gallery/
 ├── reactjs_photo_gallery_assignment.md       # Original assignment brief
 └── vite.config.js                            # Vite config (configured for port 5174)
 ```
-
----
-
-## 9. Assignment Requirements Covered
-
-| Requirement | Status | Notes |
-| :--- | :---: | :--- |
-| Single Page Application | ✅ Covered | Built with React functional components and hooks |
-| Infinite scroll from paginated feed | ✅ Covered | `https://picsum.photos/v2/list?page=${n}` |
-| 1-Column view matching mockup | ✅ Covered | Photo on left, author & thumbs-up on right |
-| Display `download_url` and `author` | ✅ Covered | Responsive image with lazy loading |
-| Append new data on reaching bottom | ✅ Covered | Seamless append without resetting previous items |
-| Stop when feed has no more data | ✅ Covered | Renders end-of-feed message on empty array |
-| Thumbs-up icon with counter | ✅ Covered | FontAwesome `faThumbsUp` initialized to 0 |
-| Unlimited counter increments | ✅ Covered | Increment on every click, isolated per photo |
-| CSS styling similar to image | ✅ Covered | White background, clean typography, blue thumbs-up |
