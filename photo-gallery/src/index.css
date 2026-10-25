@@ -1,0 +1,48 @@
+/* Global Reset and Layout */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-page: #ffffff;
+  --text-main: #111827;
+  --text-muted: #4b5563;
+  --text-author: #1f2937;
+  --border-color: #e5e7eb;
+  --icon-blue: #0284c7;
+  --icon-hover: #0369a1;
+  --shadow-subtle: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --error-text: #991b1b;
+}
+
+html, body {
+  min-height: 100%;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-main);
+  background-color: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--icon-blue);
+  outline-offset: 2px;
+}
