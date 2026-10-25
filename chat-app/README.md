@@ -1,17 +1,21 @@
 # React Chat App — Exactspace Internship Assignment
 
-A clean, responsive, single-page Team Chat application built with React, Vite, and plain CSS for the Exactspace Technologies Front End / UI Developer Internship assignment.
+A clean, responsive, real-time Team Chat application built with React, Vite, Express.js, Socket.io, and plain CSS for the Exactspace Technologies Front End / UI Developer Internship assignment.
 
 ---
 
 ## 1. Project Overview
 
-The application simulates an interactive team messaging feed with random author assignment and per-message like counters. Following the assignment instructions, it focuses strictly on the chat input box and the scrollable message thread without unnecessary sidebars or dashboards.
+The application simulates an interactive team messaging feed with random author assignment and per-message like counters. In addition to the mandatory assignment requirements, this application implements **ALL THREE optional stretch goals**:
+1. **Interactive Emoji Picker**
+2. **@User Mentions Autocomplete & Stylized Rendering**
+3. **Real-Time Client-Server Communication via Express.js & Socket.io**
 
 ---
 
 ## 2. Features Implemented
 
+### A. Mandatory Features
 - **Random Author Assignment:** Every newly sent message is assigned a random author from the predefined team list: `["Alan", "Bob", "Carol", "Dean", "Elin"]`.
 - **Dynamic Avatars & Colors:** Each author is assigned a distinct avatar color and display initial.
 - **Message Composer:** Supports sending via the **Send** button or pressing the **Enter** key.
@@ -22,15 +26,40 @@ The application simulates an interactive team messaging feed with random author 
 - **Responsive Layout:** Adaptive layout styled with plain CSS for mobile, tablet, and desktop viewports.
 - **Accessibility:** Semantic HTML elements (`<header>`, `<main>`, `<article>`, `<time>`, `<form>`), ARIA labels, and visible focus rings.
 
+### B. Completed Stretch Goals
+1. **Emoji Picker:**
+   - Interactive popover with curated categories (Smileys, Gestures, Reactions & Symbols).
+   - Inserts selected emojis at the cursor position without prematurely sending the message.
+   - Close on outside click or pressing `Escape`.
+   - Fully accessible and responsive on mobile devices.
+2. **@User Mentions:**
+   - Typing `@` triggers an autocomplete dropdown filtering the team list (`Alan`, `Bob`, `Carol`, `Dean`, `Elin`).
+   - Supports keyboard navigation (`ArrowUp`, `ArrowDown`), `Enter`/`Tab` selection, and mouse click.
+   - Preserves surrounding text and restores input focus seamlessly.
+   - Renders mentions as distinct stylized pills (`.chat-mention-badge`) safely as React elements without `dangerouslySetInnerHTML`.
+3. **Real-Time Communication (Express.js + Socket.io):**
+   - Express HTTP server running Socket.io on port `4000`.
+   - Real-time broadcast: messages sent from one client/tab instantly appear across all connected clients.
+   - Synchronized like counters: liking a message instantly updates the counter for all connected participants.
+   - Live connection badge in the header (`Live Server`, `Connecting...`, `Offline`).
+   - Clean reconnection handling and duplicate message prevention.
+   - Graceful offline fallback: if the backend server is stopped, the client continues functioning seamlessly in local mode.
+
 ---
 
 ## 3. Technology Stack
 
-- **Framework:** React 19 (`react`, `react-dom`)
-- **Build Tool:** Vite 8 (`@vitejs/plugin-react`)
-- **Language:** JavaScript (JSX)
-- **Styling:** Plain CSS (CSS Variables, Flexbox, Media Queries)
-- **Linter:** Oxlint
+- **Frontend:**
+  - React 19 (`react`, `react-dom`)
+  - Vite 8 (`@vitejs/plugin-react`)
+  - Socket.io Client (`socket.io-client`)
+  - Plain CSS (CSS Variables, Flexbox, Animations)
+  - Oxlint
+- **Backend:**
+  - Node.js (ES Modules)
+  - Express.js 4 (`express`)
+  - Socket.io 4 (`socket.io`)
+  - CORS (`cors`)
 
 ---
 
@@ -41,47 +70,81 @@ The application simulates an interactive team messaging feed with random author 
 
 ---
 
-## 5. Installation Instructions
+## 5. Running the Application
 
-Navigate to the `chat-app` directory and install dependencies:
+### Step 1: Install Dependencies
 
+#### Install frontend dependencies:
 ```bash
 cd chat-app
 npm install
 ```
 
+#### Install backend dependencies:
+```bash
+cd server
+npm install
+cd ..
+```
+
 ---
 
-## 6. Local Development
+### Step 2: Start the Backend Server
 
-Start the Vite development server:
+From inside `chat-app/`:
+```bash
+cd server
+npm start
+```
+The server will run on `http://127.0.0.1:4000` (health check: `http://127.0.0.1:4000/health`).
 
+---
+
+### Step 3: Start the Frontend Application
+
+In a separate terminal window, from `chat-app/`:
 ```bash
 npm run dev
 ```
-
-The application will be available at:
+The client will start at:
 `http://127.0.0.1:5173/`
+
+The header will display a green **"Live Server"** badge once connected.
 
 ---
 
-## 7. Production Build & Linting
+## 6. Production Build & Linting
 
-### Build for production:
+### Build frontend for production:
 ```bash
 npm run build
 ```
-Generates optimized static assets in the `dist/` directory.
 
 ### Run code linter:
 ```bash
 npm run lint
 ```
 
-### Preview production build:
-```bash
-npm run preview
+---
+
+## 7. Socket.io Event Architecture & Data Flow
+
+```text
+[ React Client A ]                [ Express + Socket.io Server ]              [ React Client B ]
+        |                                       |                                      |
+        |--- emit('send_message', payload) ---->|                                      |
+        |                                       |--- emit('new_message', message) ---->|
+        |                                       |<-- emit('like_message', msgId) ------|
+        |<-- emit('message_liked', update) -----|--- emit('message_liked', update) --->|
 ```
+
+- **`init_messages`**: Sent to newly connected clients with recent message history.
+- **`send_message`**: Dispatched by a client upon submitting a message.
+- **`new_message`**: Broadcast by the server to all clients with author and unique ID.
+- **`like_message`**: Dispatched when any client clicks like on a message.
+- **`message_liked`**: Broadcast by the server to synchronize like counts across all clients.
+
+> **Note on Storage:** Messages are stored in an in-memory queue on the server to keep active sessions synchronized. Chat history is non-persistent and will reset if the backend server process restarts.
 
 ---
 
@@ -93,19 +156,28 @@ chat-app/
 │   └── 20221208_203258_team-chat-intro.gif   # Original reference asset
 ├── public/
 │   └── vite.svg
+├── server/
+│   ├── index.js                              # Express + Socket.io server
+│   ├── package.json                          # Backend dependencies
+│   └── package-lock.json
 ├── src/
 │   ├── components/
-│   │   ├── ChatApp.jsx                       # Main controller & state manager
-│   │   ├── ChatHeader.jsx                    # Channel header
-│   │   ├── MessageList.jsx                   # Scrollable message feed & empty state
-│   │   ├── MessageItem.jsx                   # Individual message card & like button
-│   │   └── MessageInput.jsx                  # Message composer & send button
+│   │   ├── ChatApp.jsx                       # Controller, Socket.io connection & fallback
+│   │   ├── ChatHeader.jsx                    # Header with live connection indicator
+│   │   ├── EmojiPicker.jsx                   # Popover emoji picker component
+│   │   ├── MentionDropdown.jsx               # @Mention autocomplete suggestions
+│   │   ├── MessageList.jsx                   # Message thread & empty state
+│   │   ├── MessageItem.jsx                   # Message bubble & safe mention rendering
+│   │   └── MessageInput.jsx                  # Composer with emoji & mention handling
 │   ├── styles/
 │   │   ├── ChatApp.css
 │   │   ├── ChatHeader.css
+│   │   ├── EmojiPicker.css
+│   │   ├── MentionDropdown.css
 │   │   ├── MessageList.css
 │   │   └── MessageInput.css
-│   ├── utils.js                              # Avatar color mapping & time formatting
+│   ├── emojiData.js                          # Curated emoji library
+│   ├── utils.js                              # User theme colors & time formatting
 │   ├── App.jsx                               # Root application component
 │   ├── index.css                             # Global reset and CSS custom properties
 │   └── main.jsx                              # React DOM mount entry
@@ -118,26 +190,3 @@ chat-app/
 ├── team-chat-intro.gif                       # Original reference asset
 └── vite.config.js
 ```
-
----
-
-## 9. Assignment Requirements Covered
-
-| Requirement | Status | Notes |
-| :--- | :---: | :--- |
-| Single Page Application | ✅ Covered | Implemented with React functional components |
-| Textbox and Send button | ✅ Covered | MessageInput component with Enter key support |
-| Render chat thread above input | ✅ Covered | MessageList with auto-scroll ref |
-| Omit sidebar from reference image | ✅ Covered | Excluded per explicit instructions |
-| Random user assignment from list | ✅ Covered | Selects from `["Alan", "Bob", "Carol", "Dean", "Elin"]` |
-| Like button at the right end | ✅ Covered | Right-aligned in message bubble with live counter |
-| Independent, unlimited like count | ✅ Covered | Initialized to 0, immutable updates per message |
-| Clean UI matching mockup | ✅ Covered | Light gray background, white bubbles, colored avatars |
-
----
-
-## 10. Optional Stretch Goals Status
-
-- **Emoji options:** Not implemented (kept focus strictly on rock-solid mandatory functionality).
-- **Mentions (`@`):** Not implemented.
-- **Socket.io / Express server:** Not implemented (assignment is self-contained client-side SPA).

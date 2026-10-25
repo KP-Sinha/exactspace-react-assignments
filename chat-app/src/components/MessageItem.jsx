@@ -1,6 +1,32 @@
 import React from 'react';
 import { getUserColor, formatTime } from '../utils';
 
+// Regex to safely match @Username against valid users
+const MENTION_REGEX = /(@(?:Alan|Bob|Carol|Dean|Elin)\b)/g;
+
+/**
+ * Helper to parse and render text with stylized @mentions safely as React elements
+ * without dangerouslySetInnerHTML.
+ */
+function renderMessageTextWithMentions(text) {
+  if (!text) return null;
+
+  const parts = text.split(MENTION_REGEX);
+  return parts.map((part, index) => {
+    if (part.startsWith('@')) {
+      const user = part.slice(1);
+      if (['Alan', 'Bob', 'Carol', 'Dean', 'Elin'].includes(user)) {
+        return (
+          <span key={index} className="chat-mention-badge">
+            {part}
+          </span>
+        );
+      }
+    }
+    return part;
+  });
+}
+
 /**
  * MessageItem - Renders an individual chat message with author, avatar, text, and like button.
  */
@@ -23,14 +49,16 @@ function MessageItem({ message, onLike }) {
 
       <div className="message-card">
         <div className="message-meta">
-          <span id={`message-author-${id}`} className="message-author">{author}</span>
-          <time className="message-time" dateTime={new Date(timestamp).toISOString()}>
-            {formattedTime}
-          </time>
+          <div className="message-meta-left">
+            <span id={`message-author-${id}`} className="message-author">{author}</span>
+            <time className="message-time" dateTime={new Date(timestamp).toISOString()}>
+              {formattedTime}
+            </time>
+          </div>
         </div>
 
         <div className="message-body">
-          <p className="message-text">{text}</p>
+          <p className="message-text">{renderMessageTextWithMentions(text)}</p>
           <div className="message-actions">
             <button
               type="button"

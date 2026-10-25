@@ -1,11 +1,12 @@
 .message-input-form {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 24px;
+  gap: 10px;
+  padding: 14px 20px;
   background-color: var(--bg-input-bar);
   border-top: 1px solid var(--border-color);
   flex-shrink: 0;
+  position: relative;
 }
 
 .input-wrapper {
@@ -17,7 +18,7 @@
 
 .chat-input {
   width: 100%;
-  padding: 12px 18px;
+  padding: 11px 18px;
   border-radius: 24px;
   border: 1px solid var(--border-color);
   background-color: #f8fafc;
@@ -37,12 +38,41 @@
   color: var(--text-light);
 }
 
+/* Emoji toggle button */
+.emoji-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  background-color: #f8fafc;
+  border: 1px solid var(--border-color);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.emoji-toggle-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  transform: scale(1.05);
+}
+
+.emoji-toggle-btn.is-active {
+  background-color: #e0f2fe;
+  border-color: #bae6fd;
+}
+
+/* Send button */
 .send-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px 22px;
+  padding: 11px 20px;
   background-color: var(--primary-color);
   color: #ffffff;
   font-weight: 600;
@@ -73,21 +103,26 @@
 }
 
 .send-icon {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
 }
 
 @media (max-width: 640px) {
   .message-input-form {
-    padding: 12px 14px;
-    gap: 8px;
+    padding: 10px 12px;
+    gap: 6px;
   }
   .chat-input {
-    padding: 10px 14px;
-    font-size: 0.9rem;
+    padding: 9px 12px;
+    font-size: 0.875rem;
+  }
+  .emoji-toggle-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.15rem;
   }
   .send-button {
-    padding: 10px 16px;
+    padding: 9px 14px;
   }
   .send-button span {
     display: none;
